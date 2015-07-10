@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+       <head>
+              <meta charset="UTF-8">
+              <title>Three框架</title>
+              <script src="js/Three.min.js"></script>
+              <script src="js/projector.js"></script>
+              <script src="magicCube.js"></script>
+              <style type="text/css">
+                     div#canvas-frame {
+                            border: none;
+                            cursor: pointer;
+                            width: 100%;
+                            height: 600px;
+                            background-color: #EEEEEE;
+                     }
+                     body{
+                        background-color: #eeeeee;
+                     }
+ 
+              </style>
+              <script>
+            var renderer;
+             var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+            function initThree() {
+                width = document.getElementById('canvas-frame').clientWidth;
+                height = document.getElementById('canvas-frame').clientHeight;
+                renderer = new THREE.WebGLRenderer({
+                    antialias : true
+                });
+                renderer.setSize(width, height);
+                document.getElementById('canvas-frame').appendChild(renderer.domElement);
+                renderer.setClearColor(0xFFFFFF);
+                renderer.setClearAlpha(1);
+            }
+ 
+            var camera;
+            function initCamera() {
+               
+                var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+                camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+                camera.position.set(0,300,0);
+                camera.lookAt(scene.position);  
+            }
+ 
+            var scene;
+            function initScene() {
+                scene = new THREE.Scene();
+            }
+ 
+            var light;
+            function initLight() {
+                // light = new THREE.DirectionalLight(0xFFFFFF);
+                // light.position.set(1, 1,1);
+
+                light = new THREE.PointLight(0xFFFFFF);
+                light.position.set(300, 350,600);
+                scene.add(light);
+                var light2 = new THREE.PointLight(0xFFFFFF);
+                light2.position.set(-300, -350,-600);
+                scene.add(light2);
+            }
+// A begin
+            var cube,mesh,mesh2,mesh3,arr=[];
+            var magic;
+            function initObject() {
+
+                // var geometry = new THREE.BoxGeometry( 100,100,100);
+                // var material = new THREE.MeshLambertMaterial( { color:0x00ff00} );
+                // cube = new THREE.Mesh( geometry,material);
+                // cube.position = new THREE.Vector3(0,0,0);
+                // targetList.push(cube);
+                // scene.add(cube);
+
+                // this material causes a mesh to use colors assigned to faces
+                var faceColorMaterial = new THREE.MeshBasicMaterial( 
+                { color: 0xffffff, vertexColors: THREE.FaceColors } );
+                
+                var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+                for ( var i = 0; i < geometry.faces.length; i+=2 ) 
+                {
+                    var face = geometry.faces[ i ]; 
+                    //face.color.setRGB( 0, 0, 0.8 * Math.random() + 0.2 );
+                    var c = 0xFF0000*0.8 * Math.random();
+                    face.color.setHex(c);
+
+                    var face2 = geometry.faces[ i+1 ]; 
+                    face2.color.setHex(c);
+                }
+                //debugger
+                // geometry.faces[10].color.setHex(0xFF0000);
+                // geometry.faces[11].color.setHex(0xFF0000);
+                cube = new THREE.Mesh( geometry, faceColorMaterial );
+                cube.position.set(-200, 50, 0);
+                targetList.push(cube);
+                scene.add(cube);
+
+                
+                
+
+                
+                magic = new magicCube();
+                magic.init(renderer,scene,camera);
+                var itemlist = magic.getItemList();
+                for(var i=0;i<itemlist.length;i++){
+                    targetList.push(itemlist[i].geo);
+                }
+ 
+            }
+// A end
+            var projector;
+            var targetList = [];
+            var mouse = { x: 0, y: 0 };
+            function threeStart() {
+                initThree();
+                initScene();
+                initCamera();
+                initLight();
+                initObject();
+                // renderer.clear();
+                // renderer.render(scene, camera);
+                animation();
+                projector = new THREE.Projector();
+                document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+            }
+           
+            var cmr_a = 45*Math.PI/180 ;
+            function animation()
+            {
+                //cmr_a += 1 * Math.PI / 180;
+                //camera.rotation.y=cmr_a;
+                //cube.rotation.y+=Math.PI/180;
+                //cube.applyMatrix(new THREE.Matrix4().makeRotationY(0.001));
+                camera.position.x = Math.cos(cmr_a)*400;
+                camera.position.z = Math.sin(cmr_a)*400;
+                camera.lookAt({x:0,y:0,z:0});
+                renderer.render(scene, camera);
+                //requestAnimationFrame(animation);
+            }
+            
+            function moveEvent(e){
+                //console.log(e.pageX+","+e.pageY);
+                // camera.position.x = (width/2-e.pageX)/2;
+                // camera.position.y = (-height/2+e.pageY)/2;
+                camera.rotation.y = (width/2-e.pageX)/100 * Math.PI / 180;
+            }
+            //document.onmousemove = moveEvent; 
+            var mousedownX ,mousedownY;
+            // document.onmousedown = function(e){
+            //     if(!magic.isAnimate)
+            //         magic.topright();
+            //     // mousedownX = e.pageX;
+            //     // mousedownY = e.pageY;
+
+            //     // var originRotationX = cube.rotation.y*100;
+            //     // var originRotationY = cube.rotation.x*100;
+            //     // document.onmousemove = function(e){
+            //     //     cube.rotation.y = (originRotationX - mousedownX + e.pageX)/100;
+            //     //     cube.rotation.x = (originRotationY - mousedownY + e.pageY)/100;
+            //     // }
+
+            //     // document.onmouseup = function(){
+            //     //     document.onmousemove=function(){};
+            //     // }
+
+            //     console.log("Click.");
+                
+            //     // update the mouse variable
+            //     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            //     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                
+            //     // find intersections
+
+            //     // create a Ray with origin at the mouse position
+            //     //   and direction into the scene (camera direction)
+            //     var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+            //     vector.unproject(camera );
+            //     var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+            //     // create an array containing all objects in the scene with which the ray intersects
+            //     var intersects = ray.intersectObjects( targetList );
+                
+            //     // if there is one (or more) intersections
+            //     if ( intersects.length > 0 )
+            //     {
+            //         console.log("Hit @ " + toString( intersects[0].point ) );
+            //         // change the color of the closest face.
+            //         intersects[ 0 ].face.color.setRGB( 0.8 * Math.random() + 0.2, 0, 0 );
+            //         intersects[ 0 ].object.geometry.colorsNeedUpdate = true;
+            //         document.onmousemove = function(e){
+            //             intersects[ 0 ].object.position.y = - e.pageY + SCREEN_HEIGHT/2;
+            //             intersects[ 0 ].object.position.x = e.pageX- SCREEN_WIDTH/2;
+            //         }
+            //     }
+            // }
+
+            document.onmouseup = function(){
+                document.onmousemove = function(){};
+            }
+
+            function onDocumentMouseDown( event ) 
+            {
+                // the following line would stop any other event handler from firing
+                // (such as the mouse's TrackballControls)
+                // event.preventDefault();
+                
+                console.log("Click.");
+                
+                // update the mouse variable
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                
+                // find intersections
+
+                // create a Ray with origin at the mouse position
+                //   and direction into the scene (camera direction)
+                var vector = new THREE.Vector3( mouse.x, mouse.y, 1 );
+                vector.unproject(camera );
+                var ray = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+                // create an array containing all objects in the scene with which the ray intersects
+                var intersects = ray.intersectObjects( targetList );
+                
+                // if there is one (or more) intersections
+                if ( intersects.length > 0 )
+                {
+                    console.log("Hit @ " + toString( intersects[0].point ) );
+                    console.log(intersects[0].faceIndex);
+                    // change the color of the closest face.
+                    intersects[ 0 ].face.color.setRGB( 0.8 * Math.random() + 0.2, 0, 0 );
+                    intersects[ 0 ].object.geometry.colorsNeedUpdate = true;
+                }
+
+            }
+            document.onkeydown=function(event){
+                if(!magic.isAnimate)
+                {
+                    var e = event || window.event || arguments.callee.caller.arguments[0];
+                    var code = e.keyCode+32;
+                    console.log(code);
+                    if(code == 'q'.charCodeAt(0)){
+                        magic.y1right();
+                    }
+                    else if(code == 'w'.charCodeAt(0))
+                        magic.y1left();
+                    else if(code == 'a'.charCodeAt(0))
+                        magic.y2right();
+                    else if(code == 's'.charCodeAt(0))
+                        magic.y2left();
+                    else if(code == 'z'.charCodeAt(0))
+                        magic.y3right();
+                    else if(code == 'x'.charCodeAt(0))
+                        magic.y3left();
+                    else if(code == 'e'.charCodeAt(0))
+                        magic.x1right();
+                    else if(code == 'r'.charCodeAt(0))
+                        magic.x1left();
+                    else if(code == 'u'.charCodeAt(0))
+                        magic.z1right();
+                    else if(code == 'i'.charCodeAt(0))
+                        magic.z1left();
+                    else if(code==69){
+                        //左方向键
+                        var step = 0;
+                        function animation1()
+                        {
+                            step++;
+                            if(step<=18){
+                                cmr_a += 5 * Math.PI / 180;
+                                camera.position.x = Math.cos(cmr_a)*400;
+                                camera.position.z = Math.sin(cmr_a)*400;
+                                camera.lookAt({x:0,y:0,z:0});
+                                renderer.render(scene, camera);
+                                requestAnimationFrame(animation1);
+                            }
+                        }
+                        animation1();
+                    }
+                    else if(code==71){
+                        //右方向键
+                        var step = 0;
+                        function animation2()
+                        {
+                            step++;
+                            if(step<=18){                              
+                                cmr_a -= 5 * Math.PI / 180;
+                                camera.position.x = Math.cos(cmr_a)*400;
+                                camera.position.z = Math.sin(cmr_a)*400;
+                                camera.lookAt({x:0,y:0,z:0});
+                                renderer.render(scene, camera);
+                                requestAnimationFrame(animation2);
+                            }
+                        }
+                        animation2();
+                    }
+                    else if(code==70){
+                        //上方向键
+                        var step = 0;
+                        function animation3()
+                        {
+                            step++;
+                            if(step<=30){
+                                camera.position.y-=20;
+                                camera.lookAt({x:0,y:0,z:0});
+                                renderer.render(scene, camera);
+                                requestAnimationFrame(animation3);
+                            }
+                        }
+                        animation3();
+                    }
+                    else if(code==72){
+                        //下方向键
+                        var step = 0;
+                        function animation4()
+                        {
+                            step++;
+                            if(step<=30){
+                                camera.position.y+=20;
+                                camera.lookAt({x:0,y:0,z:0});
+                                renderer.render(scene, camera);
+                                requestAnimationFrame(animation4);
+                            }
+                        }
+                        animation4();
+                    }
+
+                }
+
+            }
+            function toString(v) { return "[ " + v.x + ", " + v.y + ", " + v.z + " ]"; }
+              </script>
+       </head>
+ 
+       <body onload="threeStart();">
+              <div id="canvas-frame"></div>
+       </body>
+</html>
