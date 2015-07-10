@@ -127,7 +127,9 @@ function magicCube(){
             if(a<=Math.PI/2){
             	for(var i = 0;i<list.length;i++)
             	{
+            		list[i].geo.rotation.order="YXZ";
             		list[i].geo.rotation.y -= d*step;
+            		//list[i].tileGeoRotateY(d,step);
             		if(list[i].position.x!=0||list[i].position.z!=0){
             			var p = {x:list[i].position.x,y:list[i].position.z};
         				var ta = getAngle(p.x,p.y);
@@ -156,6 +158,7 @@ function magicCube(){
 		            		list[i].setPosition(Math.cos(ta-d*Math.PI/2)*Math.sqrt(2),h,Math.sin(ta-d*Math.PI/2)*Math.sqrt(2));
             			}
             		}
+            		//list[i].tileAxisRotateY(d);
             	}
             	obj.isAnimate=false;
             }
@@ -175,6 +178,7 @@ function magicCube(){
             if(a<=Math.PI/2){
             	for(var i = 0;i<list.length;i++)
             	{
+            		list[i].geo.rotation.order="XYZ";
             		list[i].geo.rotation.x -= d*step;
             		if(list[i].position.z!=0||list[i].position.y!=0){
             			var p = {x:list[i].position.z,y:list[i].position.y};
@@ -222,6 +226,7 @@ function magicCube(){
             if(a<=Math.PI/2){
             	for(var i = 0;i<list.length;i++)
             	{
+            		list[i].geo.rotation.order="ZXY";
             		list[i].geo.rotation.z -= d*step;
             		if(list[i].position.x!=0||list[i].position.y!=0){
             			var p = {x:list[i].position.x,y:list[i].position.y};
@@ -276,7 +281,96 @@ function tile(){
 		x:0,
 		y:2,
 		z:4
+	};
+	this.axisArray=[
+		[2,5,3,4],
+		[2,5,3,4],
+		[0,4,1,5],
+		[0,4,1,5],
+		[2,0,3,1],
+		[2,0,3,1]
+	];
+	this.tileAxisRotateY = function(d){
+		//d=1顺时针，-1逆时针
+		var aro = this.axisRotation;
+		var tarray = this.axisArray[2];
+		if(aro.x==2||aro.x==3){
+			//tile的X轴指向世界的Y轴,变换tile的y,z轴指向
+			this.axisRotation.y = tarray[getAxisIndex(tarray.indexOf(this.axisRotation.y)+d)];
+			this.axisRotation.z = tarray[getAxisIndex(tarray.indexOf(this.axisRotation.z)+d)];
+		}
+		else if(aro.y==2||aro.y==3){
+			//y轴指向Y轴 变换xz
+			this.axisRotation.x = tarray[getAxisIndex(tarray.indexOf(this.axisRotation.x)+d)];
+			this.axisRotation.z = tarray[getAxisIndex(tarray.indexOf(this.axisRotation.z)+d)];
+		}
+		else if(aro.z==2||aro.z==3){
+			//z轴指向Y轴 变换zy
+			this.axisRotation.x = tarray[getAxisIndex(tarray.indexOf(this.axisRotation.x)+d)];
+			this.axisRotation.y = tarray[getAxisIndex(tarray.indexOf(this.axisRotation.y)+d)];
+		}
+	};
+	function getAxisIndex(index){
+		if(index==-1)
+			return 3;
+		else if(index==4)
+			return 0;
+		return index;
 	}
+	this.tileGeoRotateY = function(d,step){
+		var aro = this.axisRotation;
+		if(aro.x==2||aro.x==3){
+			if(aro.x==2){
+				this.geo.rotation.x -= d*step;
+			}
+			else{
+				this.geo.rotation.x += d*step;
+			}
+		}
+		else if(aro.y==2||aro.y==3){
+			if(aro.y==2){
+				this.geo.rotation.y -= d*step;
+			}
+			else{
+				this.geo.rotation.y += d*step;
+			}
+		}
+		else if(aro.z==2||aro.z==3){
+			if(aro.z==2){
+				this.geo.rotation.z -= d*step;
+			}
+			else{
+				this.geo.rotation.z += d*step;
+			}
+		}
+	};
+	this.tileGeoRotateZ = function(d,step){
+		var aro = this.axisRotation;
+		if(aro.x==4||aro.x==5){
+			if(aro.x==4){
+				this.geo.rotation.x -= d*step;
+			}
+			else{
+				this.geo.rotation.x += d*step;
+			}
+		}
+		else if(aro.y==4||aro.y==5){
+			if(aro.y==4){
+				this.geo.rotation.y -= d*step;
+			}
+			else{
+				this.geo.rotation.y += d*step;
+			}
+		}
+		else if(aro.z==4||aro.z==5){
+			if(aro.z==4){
+				this.geo.rotation.z -= d*step;
+			}
+			else{
+				this.geo.rotation.z += d*step;
+			}
+		}
+	};
 	this.setPosition=function(x,y,z){
 		if(x>-0.00005&&x<0)
 			x=0;
