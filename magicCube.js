@@ -114,22 +114,30 @@ function magicCube(){
 		return ta;
 	}
 
+	
 	function rotateY(obj,list,clockwise,h){
 		var a=0;
 		var d = 1;
 		if(!clockwise)
 			d=-1;
+
+        // var group = new THREE.Object3D();
+        // for(var i = 0;i<list.length;i++){
+        // 	group.add(list[i].geo);
+        // }
+        // scene.add(group);
 		function animation()
         {
         	obj.isAnimate=true;
         	var step = obj.rotateSpeed * Math.PI / 180;
             a += step;
             if(a<=Math.PI/2){
+            	//group.rotation.y -=d*step;
             	for(var i = 0;i<list.length;i++)
             	{
-            		list[i].geo.rotation.order="YXZ";
+
+					// list[i].geo.quaternion.setFromAxisAngle( new THREE.Vector3( 0, 1, 0 ),-1*a);
             		list[i].geo.rotation.y -= d*step;
-            		//list[i].tileGeoRotateY(d,step);
             		if(list[i].position.x!=0||list[i].position.z!=0){
             			var p = {x:list[i].position.x,y:list[i].position.z};
         				var ta = getAngle(p.x,p.y);
